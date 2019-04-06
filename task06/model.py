@@ -33,7 +33,7 @@ class ASTNodeVisitor(metaclass=abc.ABCMeta):
     def visit_conditional(self, conditional):
         pass
 
-    def visit_print(self, prnt):
+    def visit_print(self, print_):
         pass
 
     def visit_read(self, read):

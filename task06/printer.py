@@ -36,8 +36,8 @@ class PrettyPrinter(model.ASTNodeVisitor):
 
         return res
 
-    def visit_print(self, prnt):
-        expr = prnt.expr.accept(self)
+    def visit_print(self, print_):
+        expr = print_.expr.accept(self)
         return [f'print {expr[0]}']
 
     def visit_read(self, read):
