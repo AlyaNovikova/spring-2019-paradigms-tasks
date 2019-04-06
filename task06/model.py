@@ -33,7 +33,7 @@ class ASTNodeVisitor(metaclass=abc.ABCMeta):
     def visit_conditional(self, conditional):
         pass
 
-    def visit_print(self, print):
+    def visit_print(self, prnt):
         pass
 
     def visit_read(self, read):
@@ -55,7 +55,10 @@ class ASTNodeVisitor(metaclass=abc.ABCMeta):
 class ASTNode(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def evaluate(self, scope):
-        pass
+        """
+        Запускает вычисление текущего узла синтаксического дерева
+        в заданной области видимости и возвращает результат вычисления.
+        """
 
     @abc.abstractmethod
     def accept(self, visitor):
