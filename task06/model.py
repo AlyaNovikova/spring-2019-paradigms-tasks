@@ -76,7 +76,7 @@ class Number(ASTNode):
         return self
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_number(self)
 
 
 class Function(ASTNode):
@@ -88,7 +88,7 @@ class Function(ASTNode):
         return self
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_function(self)
 
 
 class FunctionDefinition(ASTNode):
@@ -101,7 +101,7 @@ class FunctionDefinition(ASTNode):
         return self.function
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_function_definition(self)
 
 
 class Conditional(ASTNode):
@@ -121,7 +121,7 @@ class Conditional(ASTNode):
         return res
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_conditional(self)
 
 
 class Print(ASTNode):
@@ -134,7 +134,7 @@ class Print(ASTNode):
         return res
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_print(self)
 
 
 class Read(ASTNode):
@@ -147,7 +147,7 @@ class Read(ASTNode):
         return val
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_read(self)
 
 
 class FunctionCall(ASTNode):
@@ -166,7 +166,7 @@ class FunctionCall(ASTNode):
         return res
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_function_call(self)
 
 
 class Reference(ASTNode):
@@ -177,7 +177,7 @@ class Reference(ASTNode):
         return scope[self.name]
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_reference(self)
 
 
 class BinaryOperation(ASTNode):
@@ -210,7 +210,7 @@ class BinaryOperation(ASTNode):
         return Number(int(self.OPERATIONS[self.op](lhs, rhs)))
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_binary_operation(self)
 
 
 class UnaryOperation(ASTNode):
@@ -230,4 +230,4 @@ class UnaryOperation(ASTNode):
         return Number(int(self.OPERATIONS[self.op](expr)))
 
     def accept(self, visitor):
-        pass
+        return visitor.visit_unary_operation(self)
