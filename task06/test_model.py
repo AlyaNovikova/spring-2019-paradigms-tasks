@@ -6,7 +6,7 @@ from model import *
 def test_construction():
     FunctionDefinition('fac', Function(['n'], [
         Conditional(
-            BinaryOperation(Reference('n'), '=', Number(0)),
+            BinaryOperation(Reference('n'), '==', Number(0)),
             [Number(1)],
             [
                 BinaryOperation(
