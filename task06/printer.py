@@ -24,8 +24,10 @@ class PrettyPrinter(model.ASTNodeVisitor):
 
     def visit_conditional(self, conditional):
         cond = conditional.condition.accept(self)[0][:-1]
-        if_true = sum((expr.accept(self) for expr in conditional.if_true), [])
-        if_false = sum((expr.accept(self) for expr in conditional.if_false), [])
+        if_true = sum((expr.accept(self) for expr in conditional.if_true),
+                      [])
+        if_false = sum((expr.accept(self) for expr in conditional.if_false),
+                       [])
 
         res = [f'if {cond} {{']
         res += self._add_identity_level(if_true)
@@ -63,55 +65,3 @@ class PrettyPrinter(model.ASTNodeVisitor):
 
 def pretty_print(expr):
     print('\n'.join(expr.accept(PrettyPrinter())))
-
-
-if __name__ == '__main__':
-    from model import *
-
-    pretty_print(FunctionDefinition('main', Function(['arg1'], [
-        Read('x'),
-        Print(Reference('x')),
-        Conditional(
-            BinaryOperation(Number(2), '==', Number(3)),
-            [
-                Conditional(Number(1), [], [])
-            ],
-            [
-                FunctionCall(Reference('exit'), [
-                    UnaryOperation('-', Reference('arg1'))
-                ])
-            ],
-        ),
-    ])))
-
-    pretty_print(
-        BinaryOperation(
-            Number(10),
-            '-',
-            UnaryOperation(
-                '-',
-                BinaryOperation(
-                    Number(3),
-                    '+',
-                    BinaryOperation(
-                        Reference('x'),
-                        '-',
-                        Reference('x')
-                    )
-                )
-            )
-        )
-    )
-
-    pretty_print(FunctionDefinition(
-        "factorial", Function(["n"], [
-            Conditional(UnaryOperation('!', Reference("n")),
-                        [Number(1)],
-                        [BinaryOperation(FunctionCall(Reference("factorial"),
-                                                      [BinaryOperation(
-                                                          Reference('n'),
-                                                          '-',
-                                                          Number(1))]),
-                                         '*',
-                                         Reference('n'))],
-                        )])))
