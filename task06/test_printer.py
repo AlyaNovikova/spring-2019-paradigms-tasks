@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 import pytest
 from model import *
 import printer
@@ -75,20 +77,20 @@ def test_end_to_end(capsys):
         ),
     ])))
 
-    out = capsys.readouterr().out
-    assert out.rstrip().split('\n') == [
-        'def main(arg1) {',
-        '    read x;',
-        '    print x;',
-        '    if (2 == 3) {',
-        '        if 1 {',
-        '        }',
-        '    } else {',
-        '        exit(-arg1);',
-        '    }',
-        '}'
-    ]
+    out = capsys.readouterr().out.rstrip()
+    expected = dedent('''\
+        def main(arg1) {
+            read x;
+            print x;
+            if (2 == 3) {
+                if 1 {
+                }
+            } else {
+                exit(-arg1);
+            }
+        }''')
 
+    assert out.rstrip() == expected
 
-if __name__ == '__main__':
-    pytest.main()
+    if __name__ == '__main__':
+        pytest.main()

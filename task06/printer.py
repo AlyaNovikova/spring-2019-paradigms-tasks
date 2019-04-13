@@ -3,21 +3,21 @@ import model
 
 class PrettyPrinter(model.ASTNodeVisitor):
     @staticmethod
-    def _add_identity_level(exprs):
+    def _add_indent_level(exprs):
         return ['    ' + expr for expr in exprs]
 
     def visit_number(self, number):
         return [f'{number.value};']
 
     def visit_function(self, function):
-        assert False
+        raise TypeError('Function node can not be processed')
 
     def visit_function_definition(self, func_def):
-        args_str = ",".join(func_def.function.args)
+        args_str = ', '.join(func_def.function.args)
         body = sum((expr.accept(self) for expr in func_def.function.body), [])
 
         res = [f'def {func_def.name}({args_str}) {{']
-        res += self._add_identity_level(body)
+        res += self._add_indent_level(body)
         res.append('}')
 
         return res
@@ -30,10 +30,10 @@ class PrettyPrinter(model.ASTNodeVisitor):
                        [])
 
         res = [f'if {cond} {{']
-        res += self._add_identity_level(if_true)
+        res += self._add_indent_level(if_true)
         if if_false:
             res.append('} else {')
-            res += self._add_identity_level(if_false)
+            res += self._add_indent_level(if_false)
         res += '}'
 
         return res
