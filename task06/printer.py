@@ -24,10 +24,10 @@ class PrettyPrinter(model.ASTNodeVisitor):
 
     def visit_conditional(self, conditional):
         cond = conditional.condition.accept(self)[0][:-1]
-        if_true = sum((expr.accept(self) for expr in conditional.if_true),
-                      [])
-        if_false = sum((expr.accept(self) for expr in conditional.if_false),
-                       [])
+        if_true = sum((expr.accept(self)
+                       for expr in conditional.if_true or []), [])
+        if_false = sum((expr.accept(self)
+                        for expr in conditional.if_false or []), [])
 
         res = [f'if {cond} {{']
         res += self._add_indent_level(if_true)
@@ -60,7 +60,7 @@ class PrettyPrinter(model.ASTNodeVisitor):
 
     def visit_unary_operation(self, unary_op):
         expr = unary_op.expr.accept(self)[0][:-1]
-        return [f'{unary_op.op}{expr};']
+        return [f'{unary_op.op}({expr});']
 
 
 def pretty_print(expr):

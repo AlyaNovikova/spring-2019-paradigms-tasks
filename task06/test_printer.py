@@ -35,7 +35,7 @@ def test_binary_operation_printer():
 def test_unary_operation_printer():
     pretty_printer = printer.PrettyPrinter()
     assert UnaryOperation(
-        '-', Number(42)).accept(pretty_printer) == ['-42;']
+        '-', Number(42)).accept(pretty_printer) == ['-(42);']
 
 
 def test_func_call_printer():
@@ -50,6 +50,13 @@ def test_conditional_printer():
     pretty_printer = printer.PrettyPrinter()
     assert Conditional(
         Number(42), [], []
+    ).accept(pretty_printer) == ['if 42 {', '}']
+
+
+def test_conditional_printer_with_none():
+    pretty_printer = printer.PrettyPrinter()
+    assert Conditional(
+        Number(42), None, None
     ).accept(pretty_printer) == ['if 42 {', '}']
 
 
@@ -78,6 +85,8 @@ def test_end_to_end(capsys):
     ])))
 
     out = capsys.readouterr().out.rstrip()
+    print("lololl")
+    print(out)
     expected = dedent('''\
         def main(arg1) {
             read x;
@@ -86,11 +95,12 @@ def test_end_to_end(capsys):
                 if 1 {
                 }
             } else {
-                exit(-arg1);
+                exit(-(arg1));
             }
         }''')
 
     assert out.rstrip() == expected
 
-    if __name__ == '__main__':
-        pytest.main()
+
+if __name__ == '__main__':
+    pytest.main()
