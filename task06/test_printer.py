@@ -50,14 +50,14 @@ def test_conditional_printer():
     pretty_printer = printer.PrettyPrinter()
     assert Conditional(
         Number(42), [], []
-    ).accept(pretty_printer) == ['if 42 {', '}']
+    ).accept(pretty_printer) == ['if (42) {', '}']
 
 
 def test_conditional_printer_with_none():
     pretty_printer = printer.PrettyPrinter()
     assert Conditional(
         Number(42), None, None
-    ).accept(pretty_printer) == ['if 42 {', '}']
+    ).accept(pretty_printer) == ['if (42) {', '}']
 
 
 def test_func_def_printer():
@@ -85,14 +85,12 @@ def test_end_to_end(capsys):
     ])))
 
     out = capsys.readouterr().out.rstrip()
-    print("lololl")
-    print(out)
     expected = dedent('''\
         def main(arg1) {
             read x;
             print x;
-            if (2 == 3) {
-                if 1 {
+            if ((2 == 3)) {
+                if (1) {
                 }
             } else {
                 exit(-(arg1));
