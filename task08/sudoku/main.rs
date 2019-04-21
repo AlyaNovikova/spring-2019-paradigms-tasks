@@ -174,28 +174,30 @@ use threadpool::ThreadPool;
 /// Если хотя бы одно решение `s` существует, возвращает `Some(s)`,
 /// в противном случае возвращает `None`.
 
-fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field>
-{
-    try_extend_field(f, |f_solved| f_solved.clone(), |f| {
-        if depth == 0 {
-            let mut f = f.clone();
-            let tx = tx.clone();
+fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field> {
+    try_extend_field(
+        f,
+        |f_solved| f_solved.clone(),
+        |f| {
+            if depth == 0 {
+                let mut f = f.clone();
+                let tx = tx.clone();
 
-            pool.execute(move|| {
-                let res = find_solution(&mut f);
-                if let Some(x) = res.clone() {
-                    if let Err(_) = tx.send(x) {
-                        // just ignore, solution is already found.
+                pool.execute(move || {
+                    let res = find_solution(&mut f);
+                    if let Some(x) = res.clone() {
+                        if let Err(_) = tx.send(x) {
+                            // just ignore, solution is already found.
+                        }
                     }
-                }
-            });
+                });
 
-            None
-        }
-        else {
-            spawn_tasks(tx, pool, depth - 1, f)
-        }
-    });
+                None
+            } else {
+                spawn_tasks(tx, pool, depth - 1, f)
+            }
+        },
+    );
 
     None
 }
@@ -211,8 +213,7 @@ fn find_solution_parallel(mut f: Field) -> Option<Field> {
 
     if let Ok(x) = rx.recv() {
         Some(x)
-    }
-    else {
+    } else {
         None
     }
 }
