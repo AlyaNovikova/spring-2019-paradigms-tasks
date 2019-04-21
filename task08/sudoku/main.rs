@@ -200,11 +200,13 @@ fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field)
     None
 }
 
+const SPAWN_DEPTH: u32 = 0;
+
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Field>();
     let pool = ThreadPool::new(8);
 
-    spawn_tasks(&tx, &pool, 1, &mut f);
+    spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f);
 
     Some(rx.recv().unwrap())
 }
