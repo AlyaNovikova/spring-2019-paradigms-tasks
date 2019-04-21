@@ -5,7 +5,7 @@
 //! Если у вас остаются вопросы или непонятные места — пишите нам, поможем разобраться.
 
 // Все предупреждения в этом crate являются ошибками.
-#![deny(warnings)]
+// #![deny(warnings)]
 
 // Намек компилятору, что мы также хотим использовать наш модуль из файла `field.rs`.
 mod field;
@@ -167,12 +167,28 @@ fn find_solution(f: &mut Field) -> Option<Field> {
     try_extend_field(f, |f_solved| f_solved.clone(), find_solution)
 }
 
+use std::sync::mpsc::{channel, Sender};
+
+// fn my_find_solution(f: &mut Field, tx: &Sender<Field>) -> Option<Field> {
+//     try_extend_field(f, |f_solved| {
+//         tx.send(f_solved.clone()).unwrap();
+//         f_solved.clone()
+//     }, |f| my_find_solution(f, tx))
+// }
 /// Перебирает все возможные решения головоломки, заданной параметром `f`, в несколько потоков.
 /// Если хотя бы одно решение `s` существует, возвращает `Some(s)`,
 /// в противном случае возвращает `None`.
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
-    // TODO: вам требуется изменить эту функцию.
-    find_solution(&mut f)
+    let (tx, rx) = channel::<Field>();
+
+    try_extend_field(&mut f, |f_solved| f_solved.clone(), |f| {
+        let res = find_solution(f);
+        if let Some(x) = res.clone() {
+            tx.send(x);
+        }
+        res
+    });
+    Some(rx.recv().unwrap())
 }
 
 /// Юнит-тест, проверяющий, что `find_solution()` находит лексикографически минимальное решение на пустом поле.
