@@ -5,7 +5,7 @@
 //! Если у вас остаются вопросы или непонятные места — пишите нам, поможем разобраться.
 
 // Все предупреждения в этом crate являются ошибками.
-// #![deny(warnings)]
+#![deny(warnings)]
 
 // Намек компилятору, что мы также хотим использовать наш модуль из файла `field.rs`.
 mod field;
@@ -184,7 +184,9 @@ fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field)
             pool.execute(move|| {
                 let res = find_solution(&mut f);
                 if let Some(x) = res.clone() {
-                    tx.send(x).unwrap();
+                    if let Err(_) = tx.send(x) {
+                        // just ignore, solution is already found.
+                    }
                 }
             });
 
