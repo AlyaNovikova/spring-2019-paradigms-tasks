@@ -168,26 +168,28 @@ fn find_solution(f: &mut Field) -> Option<Field> {
 }
 
 use std::sync::mpsc::{channel, Sender};
+use threadpool::ThreadPool;
 
-// fn my_find_solution(f: &mut Field, tx: &Sender<Field>) -> Option<Field> {
-//     try_extend_field(f, |f_solved| {
-//         tx.send(f_solved.clone()).unwrap();
-//         f_solved.clone()
-//     }, |f| my_find_solution(f, tx))
-// }
 /// Перебирает все возможные решения головоломки, заданной параметром `f`, в несколько потоков.
 /// Если хотя бы одно решение `s` существует, возвращает `Some(s)`,
 /// в противном случае возвращает `None`.
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Field>();
+    let pool = ThreadPool::new(8);
 
     try_extend_field(&mut f, |f_solved| f_solved.clone(), |f| {
-        let res = find_solution(f);
-        if let Some(x) = res.clone() {
-            tx.send(x);
-        }
-        res
+        let mut f = f.clone();
+        let tx = tx.clone();
+
+        pool.execute(move|| {
+            let res = find_solution(&mut f);
+            if let Some(x) = res.clone() {
+                tx.send(x).unwrap();
+            }
+        });
+        None
     });
+
     Some(rx.recv().unwrap())
 }
 
