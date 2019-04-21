@@ -173,22 +173,36 @@ use threadpool::ThreadPool;
 /// Перебирает все возможные решения головоломки, заданной параметром `f`, в несколько потоков.
 /// Если хотя бы одно решение `s` существует, возвращает `Some(s)`,
 /// в противном случае возвращает `None`.
+
+fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field>
+{
+    try_extend_field(f, |f_solved| f_solved.clone(), |f| {
+        if depth == 0 {
+            let mut f = f.clone();
+            let tx = tx.clone();
+
+            pool.execute(move|| {
+                let res = find_solution(&mut f);
+                if let Some(x) = res.clone() {
+                    tx.send(x).unwrap();
+                }
+            });
+
+            None
+        }
+        else {
+            spawn_tasks(tx, pool, depth - 1, f)
+        }
+    });
+
+    None
+}
+
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Field>();
     let pool = ThreadPool::new(8);
 
-    try_extend_field(&mut f, |f_solved| f_solved.clone(), |f| {
-        let mut f = f.clone();
-        let tx = tx.clone();
-
-        pool.execute(move|| {
-            let res = find_solution(&mut f);
-            if let Some(x) = res.clone() {
-                tx.send(x).unwrap();
-            }
-        });
-        None
-    });
+    spawn_tasks(&tx, &pool, 1, &mut f);
 
     Some(rx.recv().unwrap())
 }
