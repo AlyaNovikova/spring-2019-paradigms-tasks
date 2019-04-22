@@ -176,7 +176,7 @@ use threadpool::ThreadPool;
 
 fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field> {
     if depth > 0 {
-        try_extend_field(f, |f_solved| f_solved.clone(), |f| spawn_tasks(tx, pool, depth - 1, f));
+        try_extend_field(f, |f_solved| f_solved.clone(), |f| spawn_tasks(tx, pool, depth - 1, f))
     } else {
         try_extend_field(
             f,
@@ -193,10 +193,8 @@ fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field)
 
                 None
             },
-        );
+        )
     }
-
-    None
 }
 
 const SPAWN_DEPTH: u32 = 0;
@@ -205,7 +203,10 @@ fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Field>();
     let pool = ThreadPool::new(8);
 
-    spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f);
+    if let Some(sol) = spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f) {
+      return Some(sol)
+    }
+
     drop(tx);
 
     if let Ok(x) = rx.recv() {
