@@ -204,7 +204,7 @@ fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let pool = ThreadPool::new(8);
 
     if let Some(sol) = spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f) {
-      return Some(sol)
+        return Some(sol);
     }
 
     drop(tx);
