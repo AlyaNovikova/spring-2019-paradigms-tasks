@@ -174,33 +174,24 @@ use threadpool::ThreadPool;
 /// Если хотя бы одно решение `s` существует, возвращает `Some(s)`,
 /// в противном случае возвращает `None`.
 
-fn spawn_tasks(tx: &Sender<Field>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field> {
+fn spawn_tasks(tx: &Sender<Option<Field>>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field> {
     if depth > 0 {
         try_extend_field(f, |f_solved| f_solved.clone(), |f| spawn_tasks(tx, pool, depth - 1, f))
     } else {
-        try_extend_field(
-            f,
-            |f_solved| f_solved.clone(),
-            |f| {
-                let mut f = f.clone();
-                let tx = tx.clone();
+        let mut f = f.clone();
+        let tx = tx.clone();
+        pool.execute(move || {
+            tx.send(find_solution(&mut f)).unwrap_or(());
+        });
 
-                pool.execute(move || {
-                    if let Some(x) = find_solution(&mut f) {
-                        tx.send(x).unwrap_or(());
-                    }
-                });
-
-                None
-            },
-        )
+        None
     }
 }
 
 const SPAWN_DEPTH: u32 = 0;
 
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
-    let (tx, rx) = channel::<Field>();
+    let (tx, rx) = channel::<Option<Field>>();
     let pool = ThreadPool::new(8);
 
     if let Some(sol) = spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f) {
@@ -209,11 +200,7 @@ fn find_solution_parallel(mut f: Field) -> Option<Field> {
 
     drop(tx);
 
-    if let Ok(x) = rx.recv() {
-        Some(x)
-    } else {
-        None
-    }
+    rx.into_iter().find_map(|x| x)
 }
 
 /// Юнит-тест, проверяющий, что `find_solution()` находит лексикографически минимальное решение на пустом поле.
