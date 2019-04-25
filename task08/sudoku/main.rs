@@ -176,15 +176,15 @@ use threadpool::ThreadPool;
 
 fn spawn_tasks(tx: &Sender<Option<Field>>, pool: &ThreadPool, depth: u32, f: &mut Field) -> Option<Field> {
     if depth > 0 {
-        try_extend_field(f, |f_solved| f_solved.clone(), |f| spawn_tasks(tx, pool, depth - 1, f))
+        try_extend_field(f, |f| f.clone(), |f| spawn_tasks(tx, pool, depth - 1, f))
     } else {
-        let mut f = f.clone();
-        let tx = tx.clone();
-        pool.execute(move || {
-            tx.send(find_solution(&mut f)).unwrap_or(());
-        });
+      let mut f = f.clone();
+      let tx = tx.clone();
+    pool.execute(move || {
+      tx.send(find_solution(&mut f)).unwrap_or(());
+    });
 
-        None
+    None
     }
 }
 
@@ -194,13 +194,10 @@ fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Option<Field>>();
     let pool = ThreadPool::new(8);
 
-    if let Some(sol) = spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f) {
-        return Some(sol);
-    }
-
+    tx.send(spawn_tasks(&tx, &pool, SPAWN_DEPTH, &mut f)).unwrap_or(());
     drop(tx);
 
-    rx.into_iter().find_map(|x| x)
+  rx.into_iter().find_map(|x| x)
 }
 
 /// Юнит-тест, проверяющий, что `find_solution()` находит лексикографически минимальное решение на пустом поле.
