@@ -188,7 +188,7 @@ fn spawn_tasks(tx: &Sender<Option<Field>>, pool: &ThreadPool, depth: u32, f: &mu
     }
 }
 
-const SPAWN_DEPTH: u32 = 0;
+const SPAWN_DEPTH: u32 = 2;
 
 fn find_solution_parallel(mut f: Field) -> Option<Field> {
     let (tx, rx) = channel::<Option<Field>>();
