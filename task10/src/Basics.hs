@@ -19,17 +19,19 @@ tail' (_:xs) = xs
 -- 3. take' возвращает первые n >= 0 элементов исходного списка
 take' :: Int -> [a] -> [a]
 take' 0 _ = []
-take' n xs = ((head' xs):(take' (n - 1) (tail' xs)))
+take' n (x:xs) = x : take' (n - 1) xs
 
 -- 4. drop' возвращает список без первых n >= 0 элементов; если n больше длины
 -- списка, то пустой список.
 drop' :: Int -> [a] -> [a]
 drop' 0 xs = xs
-drop' n xs = drop' (n - 1) (tail' xs)
+drop' n (_:xs) = drop' (n - 1) xs
 
 -- 5. filter' возвращает список из элементов, для которых f возвращает True
 filter' :: (a -> Bool) -> [a] -> [a]
-filter' f xs = [x | x <- xs, f(x)]
+filter' _ [] = []
+filter' f (x:xs) | f x       = x : filter' f xs
+                 | otherwise = filter' f xs
 
 -- 6. foldl'' последовательно применяет функцию f к элементу списка l и значению,
 -- полученному на предыдущем шаге, начальное значение
@@ -43,11 +45,15 @@ foldl'' f z (x:xs) = foldl'' f (f z x) xs
 -- concat' [1,2] [3] == [1,2,3]
 concat' :: [a] -> [a] -> [a]
 concat' [] y = y
-concat' (x:xs) y = x:(concat' xs y)
+concat' x [] = x
+concat' (x:xs) y = x : concat' xs y
 
 -- 8. quickSort' возвращает его отсортированный список
 -- quickSort' должен быть реализован через алгоритм QuickSort
 -- (выбор pivot может быть любым)
 quickSort' :: Ord a => [a] -> [a]
 quickSort' [] = []
-quickSort' (x:xs) = concat' (quickSort' (filter' (<x) (xs))) (x:quickSort' (filter' (>=x) (xs)))
+quickSort' (x:xs) = concat' (quickSort' left) $ x : quickSort' right
+    where
+        left = filter' (< x) xs
+        right = filter' (>= x) xs
