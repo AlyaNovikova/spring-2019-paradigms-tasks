@@ -50,7 +50,7 @@ testsBasics = testGroup "Unit tests for Basics tasks"
     , testCase "foldl'' works on empty list" $
         foldl'' (+) (-1) [] @?= -1
 
-     , testCase "foldl'' can be used for finding difference of elements" $
+    , testCase "foldl'' works for non-associative operation" $
         foldl'' (-) (-2) [4, 2, 0] @?= (-8)
 
     , testCase "concat' works on finite lists as expected" $
