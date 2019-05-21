@@ -132,6 +132,25 @@ mapTests name (_ :: Proxy m) =
                 Map.lookup 1 map @?= Nothing
         ],
 
+        let f _ = Just "c" in
+        testGroup "alter" [
+            testCase "alter existing key" $
+                let map = alter f 1 (fromList [(2, "a"), (1, "b")] :: m Int String) in
+                toAscList map @?= [(1, "c"), (2, "a")],
+            testCase "alter non-existent key" $
+                let map = alter f 3 (fromList [(2, "a"), (1, "b")] :: m Int String) in
+                toAscList map @?= [(1, "b"), (2, "a"), (3, "c")]
+        ],
+
+        testGroup "lookup" [
+            testCase "lookup existing key" $
+                let map = fromList [(2, "a"), (1, "b")] :: m Int String in
+                Map.lookup 1 map @?= Just "b",
+            testCase "lookup non-existent key" $
+                let map = fromList [(2, "a"), (1, "b")] :: m Int String in
+                Map.lookup 3 map @?= Nothing
+        ],
+
         testGroup "member" [
             testCase "member in empty map" $
                 let map = empty :: m Int String in
@@ -163,6 +182,27 @@ mapTests name (_ :: Proxy m) =
             testCase "null on non-empty map" $
                 let map = fromList [(1, "a"), (2, "b")] :: m Int String in
                 Map.null map @?= False
+        ],
+
+        testGroup "empty" [
+            testCase "empty map" $
+                let map = Map.empty :: m Int Int in
+                Map.null map @?= True
+        ],
+
+        testGroup "singleton" [
+            testCase "singleton" $
+                let map = singleton 1 "a" :: m Int String in
+                size map @?= 1
+        ],
+
+        testGroup "size" [
+            testCase "empty map" $
+                let map = empty :: m Int String in
+                size map @?= 0,
+            testCase "3 keys" $
+                let map = fromList [(1, "a"), (2, "b"), (3, "c"), (1, "x")] :: m Int String in
+                size map @?= 3
         ]
     ]
 
